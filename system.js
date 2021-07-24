@@ -1,19 +1,106 @@
+let gameStart = true, time = 200
+let canvas = document.getElementById('canvas')
+let ctx = canvas.getContext('2d')
+let pixel = 10
+let cWidth = canvas.width
+let cHeight = canvas.height
+let chickens = []
+let seeds = []
+let timeSeeds = 0
+
+window.onload = function startSimulation(){
+    if(gameStart){drawCanvas()}
+    setTimeout(startSimulation,time)
+}
+
+function randowChickens(n){
+    for(let i = 0; i < n;i++){
+        newChicken()
+    }
+}
+
+function drawCanvas(){
+    draw(0,0,cWidth,cHeight,"rgb(50,200,50)")
+
+    for(let id in chickens){
+        let chicken = chickens[id]
+
+        draw(chicken.x,chicken.y,chicken.dna.size,chicken.dna.size,"white")
+        actionChicken(id)
+    }
+
+    for(let seed of seeds){
+        draw(seed.x,seed.y,seed.size,seed.size,"green")
+    }
+
+    if(timeSeeds === 0){newSeed();timeSeeds = time/10}else{timeSeeds -= 1}
+}
+
+function draw(x,y,w,h,cor){
+    ctx.fillStyle = cor
+    ctx.fillRect(x,y,w,h)
+}
+
+function newSeed(x,y) {
+    seeds.push({
+        size: pixel/2,
+        x: x + ((pixel-pixel/2)/2) || random(0,cWidth-pixel) + ((pixel-pixel/2)/2), // SIMPLIFICAR
+        y: y + ((pixel-pixel/2)/2) || random(0,cHeight-pixel) + ((pixel-pixel/2)/2)  
+    })
+}
+
+function newChicken(x,y,size,dna) {
+    chickens.push({
+        x: x || random(0,cWidth-pixel),
+        y: y || random(0,cHeight-pixel),
+        dna: dna || {
+            life: 50,
+            size: size || 10
+        }
+    })
+}
+
+function iaChicken(){
+    let x = random(-1,1)
+    let y = random(-1,1)
+
+    if(x<0){x= -10}else if(x>0){x=10}else{x=0}
+    if(y<0){y= -10}else if(y>0){y=10}else{y=0}
+    return {x,y}
+}
+
+function actionChicken(id){
+    let x = iaChicken().x ; y = iaChicken().y
+
+    if(chickens[id].x < pixel && x < 0 || chickens[id].x > cWidth - pixel*2 && x > 0){x=0}
+    if(chickens[id].y < pixel && y < 0 || chickens[id].y > cHeight - pixel*2 && y > 0){y=0}
+
+    moveChicken(id,x,y)
+}
+
+function moveChicken(id,x,y){ chickens[id].x += x ; chickens[id].y += y }
+
+
+
+
+
+
+
+
+
 // Precisa analizar a estrutura do script!
 
-let terreiro = document.getElementById('canvas'); // 900x600
-let conteudo = terreiro.getContext('2d');
-let pixel = 10;
-let idChicken = 0
-let seeds = []
-let chickens = []
-let player
+// let idChicken = 0
+// 
+// let chickens = []
+// let player
 
-let time = 200
+// let time = 200
 
-setInterval(newSeed,time/100*800)
+//setInterval(newSeed,time/100*800)
 
-addEventListener("keydown",movePlayer)
-setInterval(start,time);
+//addEventListener("keydown",movePlayer)
+//setInterval(start,time);
 
 function startPlayer(){
     player = newChicken()
@@ -58,16 +145,6 @@ function colidSeeds(chicken){
     return -1
 }
 
-function newChicken(x=random(0,(terreiro.width-pixel)/pixel)*pixel,y=random(0,(terreiro.height-pixel)/pixel)*pixel,size=pixel) {
-    return{
-        life: 50,
-        die:false,
-        x: x,
-        y: y,
-        size: size,
-    }
-}
-
 function start(){
     conteudo.fillStyle = "rgb(50,160,50)"
     conteudo.fillRect(0,0,terreiro.width,terreiro.height)
@@ -107,12 +184,6 @@ function start(){
     }else if(chickens[idChicken]){statuschickens(chickens[idChicken])}
 }
 
-function newSeed(){
-    let x = random(0,terreiro.width/pixel)*pixel
-    let y = random(0,terreiro.height/pixel)*pixel
-    seeds.push({x:x,y:y,id:seeds.length})
-}
-
 function drawSeed(){
     for(let i = 0;i < seeds.length;i++){
 
@@ -128,30 +199,18 @@ function startChicken(n) {
     }
 }
 
-function drawChicken(chicken) {
-    let x = chicken.x
-    let y = chicken.y
-    let die = chicken.die
-    let size = chicken.size
-    let cor;
+// function moveChicken(id) {
 
-    die === true? cor = "red": cor = "white";
-    conteudo.fillStyle = cor
-    conteudo.fillRect(x,y,size,size)
-}
+//     xy = direct()
+//     x = xy[0]
+//     y = xy[1]
 
-function moveChicken(id) {
+//     if(chickens[id].x < pixel && x < 0 || chickens[id].x > terreiro.width - pixel*2 && x > 0){x=0}
+//     if(chickens[id].y < pixel && y < 0 || chickens[id].y > terreiro.height - pixel*2 && y > 0){y=0}
 
-    xy = direct()
-    x = xy[0]
-    y = xy[1]
-
-    if(chickens[id].x < pixel && x < 0 || chickens[id].x > terreiro.width - pixel*2 && x > 0){x=0}
-    if(chickens[id].y < pixel && y < 0 || chickens[id].y > terreiro.height - pixel*2 && y > 0){y=0}
-
-    chickens[id].x += x
-    chickens[id].y += y
-}
+//     chickens[id].x += x
+//     chickens[id].y += y
+// }
 
 function direct(){
     let direc = random(1,10000),x = 0,y = 0
