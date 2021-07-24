@@ -38,14 +38,21 @@
 
         #desc_chicken, #status,#tChickens {
             max-height: 200px;
+            max-width: 197px;
             height: 100%;
             width: 100%;
             border: 2px solid black;
             display: flex;
-            flex-direction: column;
-            justify-content: center;
-            align-items: center;
             margin-top: 2px;
+            align-items: center;
+            justify-content: space-evenly;
+            flex-direction: column;
+        }
+
+        #button_player, #start-pause, #update, #time {
+            text-align: center;
+            max-width: 70px;
+            width: 100%;
         }
 
     </style>
@@ -57,7 +64,12 @@
         <div id="descricao">
             <aside id="tChickens"></aside>
             <aside id="status"></aside>
-            <aside id="desc_chicken"><!--<canvas style="background-color: rgb(50,160,50);" width="180" height="180"></canvas>--></aside>
+            <aside id="desc_chicken">
+                <button id="button_player" onclick="startPlayer()">Play</button>
+                <input type="button" id="start-pause" value="Pause" onclick="pauseStart()">
+                <button id="update" onclick="time = document.getElementById('time').value"> Atualizar </button>
+                <input type="text" id="time" value="200">
+            </aside>
         </div>
     </div>
 
