@@ -55,6 +55,11 @@ function pauseStart(){
     gameStart = !gameStart
 }
 
+function startChikens(){
+    let n = document.getElementById('nChickens').value
+    randowChickens(n)
+}
+
 function startPlayer() { player = padrao() }
 
 window.onload = function startSimulation(){
@@ -126,7 +131,7 @@ function drawCanvas(){ timeGame += 1/10
         }
     }
 
-    if(timeSeeds === 0){newSeed();timeSeeds = time/10}else{timeSeeds -= 1}
+    if(timeSeeds <= 0){newSeed(); timeSeeds = time/10}else{timeSeeds -= 1}
 
     status()
 }
