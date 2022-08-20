@@ -1,8 +1,5 @@
 #
-# Lente Objetiva
-
 <div align='center'>
-
-| ![Settings Dark](https://github.com/MBrayan25/small-almost-living-beings/blob/d23b8e4b86980aa736b9fb4938a0892d6232ab1d/pictures/img_de_intro.gif) 
+    <h1>-------------- Lente Objetiva --------------</h1>
+    <img src='./pictures/img_de_intro.gif' width='500' height='400' alt='Pré-vizualização' style='border: 3px solid black'>
 <div>
-
