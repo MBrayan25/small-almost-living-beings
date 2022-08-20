@@ -4,16 +4,23 @@ let terreiro = document.getElementById('canvas'); // 900x600
 let conteudo = terreiro.getContext('2d');
 let pixel = 10;
 let idChicken = 0
-let seeds = []
+let seeds = {}
 let chickens = []
 let player
+let namegeneration = 1
+let nSeeds = 0
 
-let time = 200
+let time = 20
 
-setInterval(newSeed,time/100*800)
+setInterval(()=>{
+    newSeed()
+    newSeed()
+    newSeed()
+    newSeed()
+},time*1)
 
 addEventListener("keydown",movePlayer)
-setInterval(start,time);
+setInterval(start,time*4);
 
 function startPlayer(){
     player = newChicken()
@@ -48,23 +55,26 @@ function movePlayer(event){
 }
 
 function colidSeeds(chicken){
-    for(seed of seeds){
-        if(chicken.x === seed.x && chicken.y === seed.y){
-            seeds[seed.id].x = -10
-            seeds[seed.id].y = -10
-            return 10
-        }
+    let x = chicken.x
+    let y = chicken.y
+
+    if(seeds[`${x}-${y}`] && (chicken.life + 10 < 150)){
+        seeds[`${x}-${y}`] = false
+        nSeeds--
+        return random(10,12)
     }
     return -1
 }
 
-function newChicken(x=random(0,(terreiro.width-pixel)/pixel)*pixel,y=random(0,(terreiro.height-pixel)/pixel)*pixel,size=pixel) {
+function newChicken(params) {
     return{
         life: 50,
         die:false,
-        x: x,
-        y: y,
-        size: size,
+        x: params.x ? params.x : random(0,(terreiro.width-pixel)/pixel)*pixel,
+        y: params.y ? params.y : random(0,(terreiro.height-pixel)/pixel)*pixel,
+        cor: params.cor ? params.cor : [random(1,100),random(1,100),random(1,100)],
+        size: pixel,
+        name: `id_${namegeneration}`,
     }
 }
 
@@ -72,106 +82,182 @@ function start(){
     conteudo.fillStyle = "rgb(50,160,50)"
     conteudo.fillRect(0,0,terreiro.width,terreiro.height)
 
-    drawSeed();status()
+    drawSeed();statuss()
 
     if(chickens[0]){
-        let deathNote = []
         for(let i = 0;i < chickens.length;i++){
             
             if(chickens[i].life < 1){
-                chickens[i].die = true
-                deathNote.push(i)
-            } 
-            
-            if(chickens[i].die === false){
-                moveChicken(i)
+                chickens.splice(i,1)
+            }else{
+                moveChicken(chickens[i])
+                colid(chickens[i])
                 chickens[i].life += colidSeeds(chickens[i])
+                drawChicken(chickens[i])
             }
-
-            drawChicken(chickens[i])
         }
-
-        for (let id = deathNote[0]; id < deathNote.length; id++) {
-            chickens.splice(id,1)
-        }
-
-        
+        statuschickens(chickens[idChicken])
     }
-
-    if(player){
-        if(player.life < 1){
-            player.die = true
-        }
-        drawChicken(player)
-        statuschickens(player)
-    }else if(chickens[idChicken]){statuschickens(chickens[idChicken])}
 }
 
 function newSeed(){
-    let x = random(0,terreiro.width/pixel)*pixel
-    let y = random(0,terreiro.height/pixel)*pixel
-    seeds.push({x:x,y:y,id:seeds.length})
+    let x = random(0,(terreiro.width-10)/pixel)*pixel
+    let y = random(0,(terreiro.height-10)/pixel)*pixel
+
+    if(seeds[`${x}-${y}`]){
+        if(nSeeds < ((terreiro.width/10)*(terreiro.height/10)-20)) newSeed() 
+        return
+     } else {
+        seeds[`${x}-${y}`] = {x:x,y:y,id:seeds.length}
+        nSeeds++
+     } 
+    // ARRUMAR 18/08
 }
 
 function drawSeed(){
-    for(let i = 0;i < seeds.length;i++){
+    for(let id in seeds){
+        let seed = seeds[id]
 
-        conteudo.fillStyle = "rgb(50,255,50)"
-        conteudo.fillRect(seeds[i].x,seeds[i].y,pixel/2,pixel/2) 
+        conteudo.fillStyle = seed.cor ? seed.cor : "rgb(50,255,50)"
+        conteudo.fillRect(seed.x,seed.y,pixel/2,pixel/2) 
     }
     
 }
 
 function startChicken(n) {
     for(let i = 0;i < n; i++){
-        chickens.push(newChicken()) 
+        chickens.push(newChicken({})) 
+        namegeneration++
+    }
+}
+
+function startSeeds(n){
+    for(let i = 0; i < n; i++){
+        if(nSeeds < ((terreiro.width/10)*(terreiro.height/10))) newSeed()
     }
 }
 
 function drawChicken(chicken) {
     let x = chicken.x
     let y = chicken.y
-    let die = chicken.die
     let size = chicken.size
-    let cor;
+    let cor = color(chicken.cor)
 
-    die === true? cor = "red": cor = "white";
     conteudo.fillStyle = cor
     conteudo.fillRect(x,y,size,size)
 }
 
-function moveChicken(id) {
-
-    xy = direct()
-    x = xy[0]
-    y = xy[1]
-
-    if(chickens[id].x < pixel && x < 0 || chickens[id].x > terreiro.width - pixel*2 && x > 0){x=0}
-    if(chickens[id].y < pixel && y < 0 || chickens[id].y > terreiro.height - pixel*2 && y > 0){y=0}
-
-    chickens[id].x += x
-    chickens[id].y += y
+function color(cor){
+    let r = 255/100*cor[0] 
+    let g = 255/100*cor[1]
+    let b = 255/100*cor[2]
+    
+    return `rgb(${r},${g},${b})`
 }
 
-function direct(){
-    let direc = random(1,10000),x = 0,y = 0
+function distancia(x1,y1,x2,y2){
+    return Math.sqrt((x2-x1)**2+(y2-y1)**2)
+}
 
-    if(direc < 2500){y = -pixel}                    // Up
-    if(direc > 2500 && direc < 5000){y = pixel}     // Down
-    if(direc > 5000 && direc < 7500){x = -pixel}    // Left
-    if(direc > 7500){x = pixel}                     // Rigth
+function observar(chicken){
+    D = {
+        x: chicken.x+5,
+        y: chicken.y+5,
+        d: 300
+    }
+    let seedss = []
+    let p = 30
+
+    for(let x = -p; x <= p; x+=10){
+        for(let y = -p; y <= p; y+=10){
+
+            let X = chicken.x + x
+            let Y = chicken.y + y
+
+            if(seeds[`${X}-${Y}`]){
+                let dd = distancia(X+5,Y+5,D.x,D.y)
+
+                if(dd == D.d){
+                    seedss.push({x:X,y:Y})
+                }else if(dd < D.d){
+                    seedss[0] = {x:X,y:Y}
+                    D.d = dd
+                }
+            }
+        }
+    }
+    //console.log('------------------')
+    //console.log(seedss)
+    if(seedss.length < 1) return undefined
+    return seedss[random(0,seedss.length-1)]
+}
+
+function moveChicken(chicken) {
+
+    let xy = direct(observar(chicken),chicken)
+    let x = xy[0]
+    let y = xy[1]
+
+    if(chicken.x < pixel && x < 0 || chicken.x > terreiro.width - pixel*2 && x > 0){x=0}
+    if(chicken.y < pixel && y < 0 || chicken.y > terreiro.height - pixel*2 && y > 0){y=0}
+
+    chicken.x += x
+    chicken.y += y
+}
+
+function direct(seed,chicken){
+
+    if(seed == undefined || (seed.y == chicken.y || seed.x == chicken.x)) return [random(-1,1)*10,random(-1,1)*10]
+
+    if(seed.x < chicken.x){x = -pixel}    // Left
+    if(seed.x > chicken.x){x =  pixel}    // Rigth
+    if(seed.y < chicken.y){y = -pixel}    // Up
+    if(seed.y > chicken.y){y =  pixel}    // Down
+    
+    if(seed.x < chicken.x && seed.y < chicken.y){x = -pixel ; y = -pixel} 
+    if(seed.x < chicken.x && seed.y > chicken.y){x = -pixel ; y =  pixel}  
+    if(seed.y > chicken.y && seed.x < chicken.x){y =  pixel ; x = -pixel} 
+    if(seed.y > chicken.y && seed.x > chicken.x){y =  pixel ; x =  pixel} 
 
     return [x,y]
 }
 
-function colid(){
-    for(let i = 0;i < chickens.length;i++){
-        //if()
+function colid(chicken){
+
+    for(let chicken2 of chickens){
+
+        let cond1 = chicken.name != chicken2.name
+        let cond2 = chicken.x == chicken2.x && chicken.y == chicken2.y
+        let cond3 = chicken.life > 75 && chicken2.life > 75
+
+        if( cond1 && cond2 && cond3 && chicken2){
+            chicken.life -= 25
+            chicken2.life -= 25
+
+            if(!(chicken && chicken2)) console.log(chicken,chicken2)
+
+            chickens.push(newChicken({
+                x: chicken.x,
+                y: chicken.y,
+                galita: true,
+                cor: misturarCor(chicken,chicken2)
+            }))
+
+            console.log('+ una galita')
+        }
     }
 }
 
+function misturarCor(A,B){
+    let r = (A.cor[0] + B.cor[0]) / 2
+    let g = (A.cor[1] + B.cor[1]) / 2
+    let b = (A.cor[2] + B.cor[2]) / 2
+    return [r,g,b]
+}
+
 function statuschickens(chicken) {
-    status()
+    if(chickens.length < 1) return
+    statuss()
     document.getElementById('status').innerHTML = `
     <p id='p1'> | Galinha ${idChicken} | </p>
     <p id='p2'> | Life: ${chicken.life} | </p>
@@ -180,44 +266,15 @@ function statuschickens(chicken) {
     `
 }
 
-function status(){
+function statuss(){
     document.getElementById('tChickens').innerHTML = `
     <p id='p1'> | Total de galinhas: ${chickens.length} | </p>
-    <p id='p1'> | Total de sementes: ${seeds.length} | </p>
+    <p id='p1'> | Total de sementes: ${nSeeds} | </p>
     `
 }
-
-
 
 function random(min, max) {
     min = Math.ceil(min);
     max = Math.floor(max);
     return Math.floor(Math.random() * (max - min + 1)) + min;
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-function colidChicken(){
-    for(let i = 0;i < chickens.length;i++){
-        for(let ii = 0;ii <chickens.length;ii++){
-            if(i !== ii){
-                if(chickens[i].x === chickens[ii].x && chickens[i].y === chickens[ii].y){
-                    startChicken(chickens[i].x,chickens[i].y)
-                    return console.log("Uma galinha")
-                }
-            }
-        }
-
-    }
 }
