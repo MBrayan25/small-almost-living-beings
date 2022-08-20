@@ -122,7 +122,7 @@ function drawCanvas(){ timeGame += 1/10
             deathChickens[deathChickens.length-1].dna.life += colidSeeds(deathChickens[deathChickens.length-1])
         }
     }
-
+    
     for(let id in seeds){
         let seed = seeds[id]
         if(seed.x < 0 || seed.y < 0){seeds.splice(id,1)}else{
@@ -130,7 +130,7 @@ function drawCanvas(){ timeGame += 1/10
             draw(seed.x + m,seed.y + m,seed.size,seed.size,"green")
         }
     }
-
+    
     if(timeSeeds <= 0){newSeed(); timeSeeds = time/10}else{timeSeeds -= 1}
 
     status()
