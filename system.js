@@ -1,5 +1,5 @@
 let gameStart = true
-let time = 10
+let time = 200
 let canvas = document.getElementById('canvas')
 let ctx = canvas.getContext('2d')
 let pixel = 10
@@ -7,11 +7,14 @@ let cWidth = canvas.width
 let cHeight = canvas.height
 let chickens = []
 let listDeathChickens = []
-let seeds = []
 let timeSeeds = 0
 let player = undefined
 let timeGame = 0
 let newGeration = 0
+
+let Mesh = {}
+let Seeds = []
+let limitSeeds = cWidth/pixel * cHeight/pixel
 
 function normalChicken(params){
     return{
@@ -22,7 +25,7 @@ function normalChicken(params){
         cor: params.cor || [random(1,255),random(1,185),random(1,255)],
         dna: params.dna || {
             lifeMin: random(5,30),
-            lifeMax: random(600,1000),
+            lifeMax: random(1000,2000),
             visao: random(2,25),
             timeMax: random(400,700),
             timeMin: random(150,250),
@@ -32,9 +35,7 @@ function normalChicken(params){
     }
 }
 
-for(let i = 0;i<1000;i++){
-   newSeed()
-}
+//for(let i = 0;i<1000;i++){ newSeed() }
 
 function status(){ document.getElementById('tChickens').innerHTML = `
     <p> | Tempo de jogo: ${parseInt(timeGame)} | </p>
@@ -79,31 +80,27 @@ function drawCanvas(){
     
     timeGame += 1/10
     draw(0,0,cWidth,cHeight,"rgb(50,200,50)")
-    
-    if(player !== undefined){
-        statuschickens(player)
-        draw(player.x,player.y,player.dna.size,player.dna.size,"blue")
-        player.dna.life += colidSeeds(player)
-        player.time += 1/10
-        if(player.dna.life < 1){statuschickens(player);player = undefined}
-    }else{
-        if(chickens[0]){statuschickens(chickens[0])}
-    }
 
     updateChickens()
     deathChickens()
-    
-    for(let id in seeds){
-        let seed = seeds[id]
-        if(seed.x < 0 || seed.y < 0){seeds.splice(id,1)}else{
-            let m = ((pixel-pixel/2)/2)
-            draw(seed.x + m,seed.y + m,seed.size,seed.size,"green")
-        }
-    }
+    updateSeeds()
     
     if(timeSeeds <= 0){newSeed(); timeSeeds = time/10}else{timeSeeds -= 1}
 
     status()
+}
+
+function updateSeeds(){
+    for(let id in seeds){
+        let seed = seeds[id]
+
+        if(seed.coleted){
+            seeds.splice(id,1)
+        }else{
+            let m = ((pixel-pixel/2)/2)
+            draw(seed.x + m,seed.y + m,seed.size,seed.size,"green")
+        }
+    }
 }
 
 function deathChickens(){
@@ -162,13 +159,23 @@ function draw(x,y,w,h,cor){
     ctx.fillRect(x,y,w,h)
 }
 
-function newSeed(x,y) {
-    seed = {
-        size: pixel/2,
-        x: x || (random(0,cWidth/10)*pixel - pixel), // SIMPLIFICAR
-        y: y || (random(0,cHeight/10)*pixel - pixel)  
+function newSeed() {
+    let x = random(0,cWidth/pixel)*pixel
+    let y = random(0,cHeight/pixel)*pixel
+
+    if(!Mesh[`${x}:${y}`]) Mesh[`${x}:${y}`] = {}
+
+    if(!Mesh[`${x}:${y}`].seed){
+        Mesh[`${x}:${y}`].seed = {
+            size: pixel/2,
+            x: x - parseInt(pixel/2),
+            y: y - parseInt(pixel/2)
+        }
+    
+        Seeds.push(`${x}:${y}`)
+    }else if(Seeds.length < limitSeeds){
+        newSeed()
     }
-    if(seeds.indexOf(seed) < 0){seeds.push(seed)}else{console.log(seed)}
 }
 
 function newChicken(params){ chickens.push(normalChicken(params)) }
@@ -193,10 +200,8 @@ function moveChicken(id){
 
     if(dire <= 5 && chickens[id].life >= chickens[id].lifeMin+50){
         dire = radar(chickens[id],chickens)
-    }else if(chickens[id].life <= chickens[id].lifeMax ){
+    }else {
         dire = radar(chickens[id],seeds)
-    }else{
-        dire = []
     }
 
     let direct = direction(chickens[id],dire)
@@ -253,13 +258,14 @@ function movePlayer(event){
 }
 
 function colidSeeds(chicken){
+    if(chicken.life >= chicken.dna.lifeMax) return -1
     for(seed of seeds){
         if(chicken.x === seed.x && chicken.y === seed.y){
             seed.x = -10
             seed.y = -10
-            return 3
+            return 5
         }
-    } return -1/10
+    } return -1
 }
 
 function colid(idA){
@@ -271,7 +277,6 @@ function colid(idA){
 
             if( ifA && ifB && ifC){
                 newGeration += 1
-                console.log()
                 newChicken({
                     x: chickens[idA].x,
                     y: chickens[idA].y,
@@ -292,11 +297,11 @@ function dnaFunc(dnaA,dnaB){
     dnaB -= newLife
 
     return {
-        lifeMin: (dnaA.lifeMin + dnaB.lifeMin + random(dnaA.lifeMin, dnaB.lifeMin)) / 3,
-        lifeMax: (dnaA.lifeMax + dnaB.lifeMin + random(dnaA.lifeMin, dnaB.lifeMin)) / 3,
-        visao: (dnaA.visao + dnaB.visao + random(dnaA.visao, dnaB.visao)) / 3,
-        timeMax: (timeMax * 1.8) - (timeMax * size/10),
-        timeMin: (dnaA.timeMin + dnaB.timeMin + random(dnaA.timeMin, dnaB.timeMin)) / 3,
+        lifeMin: parseInt((dnaA.lifeMin + dnaB.lifeMin + random(dnaA.lifeMin, dnaB.lifeMin)) / 3),
+        lifeMax: parseInt((dnaA.lifeMax + dnaB.lifeMax + random(dnaA.lifeMax, dnaB.lifeMax)) / 3),
+        visao: parseInt((dnaA.visao + dnaB.visao + random(dnaA.visao, dnaB.visao)) / 3),
+        timeMax: parseInt((timeMax * 1.8) - (timeMax * size/10)),
+        timeMin: parseInt((dnaA.timeMin + dnaB.timeMin + random(dnaA.timeMin, dnaB.timeMin)) / 3),
         life: newLife,
         size: parseInt(size)
     }
