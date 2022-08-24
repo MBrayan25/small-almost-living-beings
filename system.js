@@ -16,14 +16,14 @@ let newGeration = 0
 function normalChicken(params){
     return{
         kill: false,
-        x: params.x || random(0,cWidth/10)*pixel - pixel,
-        y: params.y || random(0,cHeight/10)*pixel - pixel,
+        x: params.x || random(1,cWidth/10)*pixel,
+        y: params.y || random(1,cHeight/10)*pixel,
         time: 0,
         cor: params.cor || [random(1,255),random(1,185),random(1,255)],
         dna: params.dna || {
             lifeMin: random(5,30),
             lifeMax: random(1000,2000),
-            visao: random(2,25),
+            visao: random(2,35),
             timeMax: random(400,700),
             timeMin: random(150,250),
             life: random(10,50),
@@ -43,7 +43,8 @@ function status(){ document.getElementById('tChickens').innerHTML = `
     <p> | Nova geração: ${newGeration} | </p>`
 }
 
-function statuschickens(chicken) { document.getElementById('status').innerHTML = `
+function statuschickens(chicken) { 
+    document.getElementById('status').innerHTML = `
     <p id='p2'> | Life: ${parseInt(chicken.dna.life)} vs ${parseInt(chicken.dna.lifeMax)} | </p>
     <p id='p2'> | Time: ${parseInt(chicken.time)} vs ${parseInt(chicken.dna.timeMax)} | </p>
     <p id='p2'> | Position: ${chicken.x} - ${chicken.y} | </p>
@@ -171,7 +172,9 @@ function newSeed(x,y) {
     if(seeds.indexOf(seed) < 0){seeds.push(seed)}else{console.log(seed)}
 }
 
-function newChicken(params){ chickens.push(normalChicken(params)) }
+function newChicken(params){
+    chickens.push(normalChicken(params))
+}
 
 function radar(chicken,Seeds){
     let listSeed = []
@@ -271,7 +274,6 @@ function colid(idA){
 
             if( ifA && ifB && ifC){
                 newGeration += 1
-                console.log()
                 newChicken({
                     x: chickens[idA].x,
                     y: chickens[idA].y,
@@ -288,8 +290,8 @@ function dnaFunc(dnaA,dnaB){
     let size = (dnaA.size + dnaB.size + random(dnaA.size, dnaB.size)) / 3
     let timeMax = (dnaA.timeMax + dnaB.timeMax + random(dnaA.timeMax, dnaB.timeMax)) / 3
 
-    dnaA -= newLife
-    dnaB -= newLife
+    dnaA.life -= newLife
+    dnaB.life -= newLife
 
     return {
         lifeMin: parseInt((dnaA.lifeMin + dnaB.lifeMin + random(dnaA.lifeMin, dnaB.lifeMin)) / 3),
