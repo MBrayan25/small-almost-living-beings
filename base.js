@@ -35,21 +35,6 @@ for(let i = 0;i<1000;i++){
    newSeed()
 }
 
-function status(){ document.getElementById('tChickens').innerHTML = `
-    <p> | Tempo de jogo: ${parseInt(timeGame)} | </p>
-    <p> | Total de galinhas: ${chickens.length} | </p>
-    <p> | Total de sementes: ${seeds.length} | </p>
-    <p> | Nova geração: ${newGeration} | </p>`
-}
-
-function statuschickens(chicken) { 
-    document.getElementById('status').innerHTML = `
-    <p id='p2'> | Life: ${parseInt(chicken.dna.life)} vs ${parseInt(chicken.dna.lifeMax)} | </p>
-    <p id='p2'> | Time: ${parseInt(chicken.time)} vs ${parseInt(chicken.dna.timeMax)} | </p>
-    <p id='p2'> | Position: ${chicken.x} - ${chicken.y} | </p>
-    <p id='p2'> | Tamanho: ${chicken.dna.size} | </p>`
-}
-
 function startChikens(){
     let n = document.getElementById('nChickens').value
     randowChickens(n)

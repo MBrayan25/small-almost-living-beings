@@ -1,7 +1,6 @@
 function Design(){
 
-    function descriptionSimulation(){ 
-        console.log('Ok')
+    function descriptionSimulation(){
         document.getElementById('desc_simulation').innerHTML = `
         <p> | Time of simulation: ${0} | </p>
         <p> | Total of organisms: ${0} | </p>

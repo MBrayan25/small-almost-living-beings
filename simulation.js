@@ -8,17 +8,17 @@ function Simulation (){
     let pixel = 10
     let cWidth = canvas.width
     let cHeight = canvas.height
-    let speed = 500
+    let speed = 150
 
 
     function startSimulation(){
-        setTimeout(()=>{
-            exportDesign.descriptionSimulation()
-
-            if(activedSimulation) exeSimulation()
-
-        }, speed)
-        startSimulation()
+        if(activedSimulation){
+            setTimeout(()=>{
+                exportDesign.descriptionSimulation()
+                exeSimulation()
+                startSimulation()
+            }, speed)
+        }
     }
 
     function exeSimulation(){
@@ -30,13 +30,14 @@ function Simulation (){
 
         if(button === "Pause"){
             button = "Start"
+            activedSimulation = !activedSimulation
         }else{
             button = "Pause"
+            activedSimulation = !activedSimulation
+            exportSimulation.startSimulation()
         }
 
         document.getElementById("start-pause").value = button
-
-        activedSimulation = !activedSimulation
     }
 
     return {
