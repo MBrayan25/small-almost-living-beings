@@ -16,7 +16,7 @@
             background-color: gray;
         }
 
-        #descricao {
+        #description {
             background-color: darkgray;
             max-width: 197px;
             margin-left: -2px;
@@ -42,7 +42,7 @@
             border: 2px solid black;
         }
 
-        #desc_chicken, #status,#tChickens {
+        #menu, #desc_organism,#desc_simulation {
             max-height: 200px;
             max-width: 197px;
             height: 100%;
@@ -55,7 +55,7 @@
             flex-direction: column;
         }
 
-        #nChickens, #button_player, #start-pause, #update, #time {
+        #n_organism, #button_player, #start-pause, #update, #speed {
             text-align: center;
             max-width: 110px;
             width: 100%;
@@ -73,21 +73,31 @@
 
     <div id="painel">
         <canvas id="canvas" width="800" height="620"></canvas>
-        <div id="descricao">
-            <aside id="tChickens"></aside>
-            <aside id="status"></aside>
-            <aside id="desc_chicken">
-                <input type="button" id="start-pause" value="Start" onclick="pauseStart()">
-                <button id="button_new_chickens" onclick="startChikens()">New Chickens</button>
-                <input type="text" id="nChickens" value="10">
-                <button id="button_player" onclick="startPlayer()">Player</button>
-                <button id="update" onclick="time = document.getElementById('time').value"> Atualizar </button>
-                <input type="text" id="time" value="10">
+        <div id="description">
+            <aside id="desc_simulation"></aside>
+            <aside id="desc_organism"></aside>
+            <aside id="menu">
+                <input type="button" id="start-pause" value="Start" onclick="exportSimulation.pauseStart()">
+                <button id="button_new_organism" onclick="startOrganism()"> New organism </button>
+                <input type="text" id="n_organism" value="10">
+
+                <button id="update" onclick="exportSimulation.updateSeepd(document.getElementById('speed').value)"> Update </button>
+
+                <input type="text" id="speed" value="150">
             </aside>
         </div>
     </div>
 
-    <script src='system.js'></script>
+    <script src="design.js"></script>
+    <script src="simulation.js"></script>
+
+    <script>
+
+        let exportSimulation = Simulation()
+
+        exportSimulation.startSimulation()
+
+    </script>
     
 </body>
 </html>

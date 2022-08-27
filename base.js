@@ -50,13 +50,6 @@ function statuschickens(chicken) {
     <p id='p2'> | Tamanho: ${chicken.dna.size} | </p>`
 }
 
-function pauseStart(){
-    let test = document.getElementById("start-pause").value
-    if(test === "Pause"){test = "Start"}else{test = "Pause"}
-    document.getElementById("start-pause").value = test
-    gameStart = !gameStart
-}
-
 function startChikens(){
     let n = document.getElementById('nChickens').value
     randowChickens(n)
