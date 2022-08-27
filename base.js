@@ -51,10 +51,7 @@ function randowChickens(n){
     }
 }
 
-function drawCanvas(){ 
-    
-    timeGame += 1/10
-    draw(0,0,cWidth,cHeight,"rgb(50,200,50)")
+function drawCanvas(){
 
     updateChickens()
     deathChickens()
