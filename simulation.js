@@ -13,6 +13,10 @@ function Simulation (){
     let delayTime = 0
     let highlighter
     
+    let CartesianPlane = {}
+    let Organisms = {}
+    let Foods = {}
+
     let exportDesign = Design({ canvas, ctx, pixel })
 
     function startSimulation(){
@@ -44,6 +48,31 @@ function Simulation (){
             color: "rgb(50,200,50)"
         })
 
+    }
+
+    function newOrganism(params){
+        return {
+            x: params.x || random(0,cWidth/pixel)*pixel,
+            y: params.y || random(0,cHeight/pixel)*pixel,
+            cor: params.cor || [random(1,255),random(1,185),random(1,255)],
+            die: false,
+            age: 0,
+            dna: params.dna || newDna()
+        }
+    }
+
+    function newDna(){
+        return  {
+            energy: random(50,100),
+            minEnergy: random(100,200),
+            maxEnergy: random(1000,2000),
+            rangeOfVision: random(3,35),
+            maxAge: random(400,700),
+            size: random(7,10)
+        }
+    }
+
+    function newFood(){
 
     }
 
