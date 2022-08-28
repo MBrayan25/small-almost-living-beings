@@ -9,6 +9,7 @@ let chickens = []
 let listDeathChickens = []
 let seeds = []
 let timeSeeds = 0
+let player = undefined
 let timeGame = 0
 let newGeration = 0
 
@@ -35,13 +36,37 @@ for(let i = 0;i<1000;i++){
    newSeed()
 }
 
+function status(){ document.getElementById('tChickens').innerHTML = `
+    <p> | Tempo de jogo: ${parseInt(timeGame)} | </p>
+    <p> | Total de galinhas: ${chickens.length} | </p>
+    <p> | Total de sementes: ${seeds.length} | </p>
+    <p> | Nova geração: ${newGeration} | </p>`
+}
+
+function statuschickens(chicken) { 
+    document.getElementById('status').innerHTML = `
+    <p id='p2'> | Life: ${parseInt(chicken.dna.life)} vs ${parseInt(chicken.dna.lifeMax)} | </p>
+    <p id='p2'> | Time: ${parseInt(chicken.time)} vs ${parseInt(chicken.dna.timeMax)} | </p>
+    <p id='p2'> | Position: ${chicken.x} - ${chicken.y} | </p>
+    <p id='p2'> | Tamanho: ${chicken.dna.size} | </p>`
+}
+
+function pauseStart(){
+    let test = document.getElementById("start-pause").value
+    if(test === "Pause"){test = "Start"}else{test = "Pause"}
+    document.getElementById("start-pause").value = test
+    gameStart = !gameStart
+}
+
 function startChikens(){
     let n = document.getElementById('nChickens').value
     randowChickens(n)
 }
 
+function startPlayer() { player = normalChicken({}) }
+
 window.onload = function startSimulation(){
-    if(gameStart === true) drawCanvas() 
+    if(gameStart === true){drawCanvas();addEventListener("keydown",movePlayer)}
     setTimeout(startSimulation,time)
 }
 
@@ -51,7 +76,20 @@ function randowChickens(n){
     }
 }
 
-function drawCanvas(){
+function drawCanvas(){ 
+    
+    timeGame += 1/10
+    draw(0,0,cWidth,cHeight,"rgb(50,200,50)")
+    
+    if(player !== undefined){
+        statuschickens(player)
+        draw(player.x,player.y,player.dna.size,player.dna.size,"blue")
+        player.dna.life += colidSeeds(player)
+        player.time += 1/10
+        if(player.dna.life < 1){statuschickens(player);player = undefined}
+    }else{
+        if(chickens[0]){statuschickens(chickens[0])}
+    }
 
     updateChickens()
     deathChickens()
@@ -126,7 +164,7 @@ function draw(x,y,w,h,cor){
 }
 
 function newSeed(x,y) {
-    let seed = {
+    seed = {
         size: pixel/2,
         x: x || (random(0,cWidth/10)*pixel - pixel), // SIMPLIFICAR
         y: y || (random(0,cHeight/10)*pixel - pixel)  
@@ -140,12 +178,12 @@ function newChicken(params){
 
 function radar(chicken,Seeds){
     let listSeed = []
-    let x1 = chicken.x - chicken.dna.visao*pixel
-    let y1 = chicken.y - chicken.dna.visao*pixel
-    let x2 = chicken.x + chicken.dna.visao*pixel
-    let y2 = chicken.y + chicken.dna.visao*pixel
+    x1 = chicken.x - chicken.dna.visao*pixel
+    y1 = chicken.y - chicken.dna.visao*pixel
+    x2 = chicken.x + chicken.dna.visao*pixel
+    y2 = chicken.y + chicken.dna.visao*pixel
 
-    for(let seed of Seeds){
+    for(seed of Seeds){
         if(seed.x > x1 && seed.x < x2 && seed.y > y1 && seed.y < y2){
             listSeed.push(seed)
         } 
@@ -170,22 +208,21 @@ function moveChicken(id){
     else if(direct <= 2000){y = pixel}
     else if(direct <= 3000){x = -pixel}
     else if(direct <= 4000){x = pixel}
-    else if(direct <= 5000){x = -pixel; y = -pixel}
-    else if(direct <= 6000){x = pixel; y = -pixel}
-    else if(direct <= 7000){x = -pixel; y = pixel}
-    else if(direct <= 8000){x = pixel; y = pixel}
+    else if(direct <= 5000){x = -pixel, y = -pixel}
+    else if(direct <= 6000){x = pixel, y = -pixel}
+    else if(direct <= 7000){x = -pixel, y = pixel}
+    else if(direct <= 8000){x = pixel, y = pixel}
 
     if(chickens[id].x < pixel && x < 0 || chickens[id].x > cWidth - pixel*2 && x > 0){x=0}
     if(chickens[id].y < pixel && y < 0 || chickens[id].y > cHeight - pixel*2 && y > 0){y=0}
 
-    chickens[id].x += x
-    chickens[id].y += y
+    chickens[id].x += x, chickens[id].y += y
 }
 
 function direction(chicken,listSeed){
     if(listSeed.length > 0){
       let d = []
-        for(let Seed of listSeed){
+        for(Seed of listSeed){
             d.push(Math.sqrt((Seed.x - chicken.x)**2 + (Seed.y - chicken.y)**2))
         }
         let seed = listSeed[d.indexOf(Math.min(...d))]
@@ -201,8 +238,25 @@ function direction(chicken,listSeed){
     return random(1,8000)
 }
 
+function movePlayer(event){
+    if(player && gameStart){
+        let x = 0; let y = 0
+        switch(event.keyCode){
+            case 65:x = -pixel;mover(); break;
+            case 87:y = -pixel;mover(); break;
+            case 68:x = pixel;mover(); break;
+            case 83:y = pixel;mover(); break;
+        }
+        function mover(){
+            if(player.x < pixel && x < 0 || player.x > cWidth - pixel*2 && x > 0){x=0}
+            if(player.y < pixel && y < 0 || player.y > cHeight - pixel*2 && y > 0){y=0}
+            player.x += x ; player.y += y
+        }
+    }
+}
+
 function colidSeeds(chicken){
-    for(let seed of seeds){
+    for(seed of seeds){
         if(chicken.x === seed.x && chicken.y === seed.y){
             seed.x = -10
             seed.y = -10
@@ -212,7 +266,7 @@ function colidSeeds(chicken){
 }
 
 function colid(idA){
-    for(let idB in chickens){
+    for(idB in chickens){
         if(idA !== idB){
             let ifA = chickens[idA].x === chickens[idB].x && chickens[idA].y === chickens[idB].y
             let ifB = chickens[idA].time > chickens[idA].dna.timeMin && chickens[idB].time > chickens[idB].dna.timeMin
